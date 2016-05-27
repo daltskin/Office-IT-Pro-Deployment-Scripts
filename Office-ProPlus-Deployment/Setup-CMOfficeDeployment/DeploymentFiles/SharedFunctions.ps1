@@ -1780,7 +1780,6 @@ function Remove-ProductSku() {
    }
 }
 
-
 function Add-ProductLanguage() {
    [CmdletBinding()]
    param(
@@ -1803,12 +1802,49 @@ function Add-ProductLanguage() {
     if ($ProductIDs -eq "All") {
         $productsToCheck = @("O365ProPlusRetail","O365BusinessRetail","VisioProRetail","ProjectProRetail","SPDRetail","VisioProXVolume","VisioStdXVolume","ProjectProXVolume","ProjectStdXVolume")
          
-        foreach ($ProductID in $productsToCheck) {            $existingSku = Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID            if ($existingSku) {                $newLangList = @()                foreach ($language in $existingSku.Languages) {                   $newLangList += $language                }                foreach ($newLanguage in $languages) {                  $newLangList += $newLanguage                }                if (Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID) {                   Set-ODTProductToAdd -ProductId $ProductID -TargetFilePath $targetFilePath -LanguageIds $newLangList | Out-Null                  }
+        foreach ($ProductID in $productsToCheck) {            $existingSku = Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID            if ($existingSku) {                $newLangList = @()                foreach ($language in $existingSku.Languages) {                   $newLangList += $language                }                foreach ($newLanguage in $languages) {                   if (!($newLangList.Contains($newLanguage))) {                     $newLangList += $newLanguage                   }                }                if (Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID) {                   Set-ODTProductToAdd -ProductId $ProductID -TargetFilePath $targetFilePath -LanguageIds $newLangList | Out-Null                  }
             }
         }
     } else {
-        foreach ($ProductID in $ProductIDs) {            if (!(Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID)) {                  Add-ODTProductToAdd -ProductId $ProductID -TargetFilePath $targetFilePath -LanguageIds $languages | Out-Null                }
-            Set-ODTProductToAdd -ProductId $ProductID -TargetFilePath $targetFilePath -LanguageIds $languages | Out-Null  
+        foreach ($ProductID in $ProductIDs) {            if (!(Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID.ToString())) {                  Add-ODTProductToAdd -ProductId $ProductID.ToString() -TargetFilePath $targetFilePath -LanguageIds $languages | Out-Null                }
+
+            $existingSku = Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID.ToString()            if ($existingSku) {                $newLangList = @()                foreach ($language in $existingSku.Languages) {                   $newLangList += $language                }                foreach ($newLanguage in $languages) {                   if (!($newLangList.Contains($newLanguage))) {                     $newLangList += $newLanguage                   }                }                if (Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID.ToString()) {                   Set-ODTProductToAdd -ProductId $ProductID.ToString() -TargetFilePath $targetFilePath -LanguageIds $newLangList | Out-Null                  }
+            }
+        }
+    }
+   }
+}
+
+function Remove-ProductLanguage() {
+   [CmdletBinding()]
+   param(
+      [Parameter(Mandatory=$true)]
+      [string] $TargetFilePath,
+
+      [Parameter(Mandatory=$true)]
+      [Microsoft.Office.ProductSelection[]] $ProductIDs,
+
+      [Parameter(Mandatory=$true)]
+      [string[]] $Languages
+   )
+   process {
+     $scriptPath = GetScriptRoot
+     $editFilePath = "$scriptPath\Edit-OfficeConfigurationFile.ps1"
+     if (Test-Path -Path $editFilePath) {
+          . $editFilePath
+     }
+
+    if ($ProductIDs -eq "All") {
+        $productsToCheck = @("O365ProPlusRetail","O365BusinessRetail","VisioProRetail","ProjectProRetail","SPDRetail","VisioProXVolume","VisioStdXVolume","ProjectProXVolume","ProjectStdXVolume")
+         
+        foreach ($ProductID in $productsToCheck) {            $existingSku = Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID            if ($existingSku) {                $newLangList = @()                foreach ($language in $existingSku.Languages) {                   [bool]$addLanguages = $true                   foreach ($newLanguage in $languages) {                      if ($language.ToLower() -eq $newLanguage.ToLower()) {                         $addLanguages = $false                      }                   }                   if ($addLanguages) {                       $newLangList += $language                   }                }                if (Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID) {                   Set-ODTProductToAdd -ProductId $ProductID -TargetFilePath $targetFilePath -LanguageIds $newLangList | Out-Null                  }
+            }
+        }
+    } else {
+        foreach ($ProductID in $ProductIDs) {            if (!(Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID.ToString())) {                  Add-ODTProductToAdd -ProductId $ProductID.ToString() -TargetFilePath $targetFilePath -LanguageIds $languages | Out-Null                }
+
+            $existingSku = Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID.ToString()            if ($existingSku) {                $newLangList = @()                foreach ($language in $existingSku.Languages) {                   [bool]$addLanguages = $true                   foreach ($newLanguage in $languages) {                      if ($language.ToLower() -eq $newLanguage.ToLower()) {                         $addLanguages = $false                      }                   }                   if ($addLanguages) {                       $newLangList += $language                   }                }                if (Get-ODTProductToAdd -TargetFilePath $targetFilePath -ProductId $ProductID.ToString()) {                   Set-ODTProductToAdd -ProductId $ProductID.ToString() -TargetFilePath $targetFilePath -LanguageIds $newLangList | Out-Null                  }
+            }
         }
     }
    }

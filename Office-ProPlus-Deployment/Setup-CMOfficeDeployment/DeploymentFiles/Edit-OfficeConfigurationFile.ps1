@@ -3024,7 +3024,7 @@ Function IsSupportedLanguage() {
            [string] $Language,
 
            [Parameter()]
-           [bool] $ShowLanguages = $true
+           [bool] $ShowLanguages = $false
         )
 
         $lang = $validLanguages | where {$_.ToString().ToUpper().EndsWith("|$Language".ToUpper())}
