@@ -275,6 +275,17 @@ Create-CMOfficePackage -Channels Deferred -Bitness v32 -OfficeSourceFilesPath D:
                 $officeFileChannelPath = "$OfficeSourceFilesPath\$ChannelShortName"
                 $officeFileTargetPath = "$LocalChannelPath"
 
+                [string]$oclVersion = $NULL
+                if ($officeFileChannelPath) {
+                    if (Test-Path -Path "$officeFileChannelPath\Office\Data") {
+                       $oclVersion = Get-LatestVersion -UpdateURLPath $officeFileChannelPath
+                    }
+                }
+
+                if ($oclVersion) {
+                   $latestVersion = $oclVersion
+                }
+
                 if (!(Test-Path -Path $officeFileChannelPath)) {
                     throw "Channel Folder Missing: $officeFileChannelPath - Ensure that you have downloaded the Channel you are trying to deploy"
                 }
