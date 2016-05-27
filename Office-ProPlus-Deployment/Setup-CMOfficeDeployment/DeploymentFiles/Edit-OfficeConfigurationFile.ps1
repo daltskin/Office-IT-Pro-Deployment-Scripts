@@ -1,7 +1,7 @@
 ﻿[String]$global:saveLastConfigFile = $NULL
 [String]$global:saveLastFilePath = $NULL
 
-$validProductIds = @("O365ProPlusRetail","O365BusinessRetail","VisioProRetail","ProjectProRetail", "SPDRetail")
+$validProductIds = @("O365ProPlusRetail","O365BusinessRetail","VisioProRetail","ProjectProRetail", "SPDRetail", "VisioProXVolume", "VisioStdXVolume", "ProjectProXVolume", "ProjectStdXVolume")
 
 try {
 $enum = "
@@ -445,18 +445,20 @@ Here is what the portion of configuration file looks like when modified by this 
         }
 
         #Set the desired values
-        [System.XML.XMLElement]$ProductElement = $ConfigFile.Configuration.Add.Product | ?  ID -eq $ProductId
+        [System.XML.XMLElement]$ProductElement = $ConfigFile.Configuration.Add.Product | Where { $_.ID -eq $ProductId }
         if($ProductElement -eq $null){
             [System.XML.XMLElement]$ProductElement=$ConfigFile.CreateElement("Product")
             $AddElement.appendChild($ProductElement) | Out-Null
             $ProductElement.SetAttribute("ID", $ProductId) | Out-Null
             if($PIDKEY -ne $null){
+              if($PIDKEY){
                 $ProductElement.SetAttribute("PIDKEY", $PIDKEY) | Out-Null
+              }
             }
         }
 
         foreach($LanguageId in $LanguageIds){
-            [System.XML.XMLElement]$LanguageElement = $ProductElement.Language | ?  ID -eq $LanguageId
+            [System.XML.XMLElement]$LanguageElement = $ProductElement.Language | Where { $_.ID -eq $LanguageId }
             if($LanguageElement -eq $null){
                 [System.XML.XMLElement]$LanguageElement=$ConfigFile.CreateElement("Language")
                 $ProductElement.appendChild($LanguageElement) | Out-Null
@@ -465,7 +467,7 @@ Here is what the portion of configuration file looks like when modified by this 
         }
 
         foreach($ExcludeApp in $ExcludeApps){
-            [System.XML.XMLElement]$ExcludeAppElement = $ProductElement.ExcludeApp | ?  ID -eq $ExcludeApp
+            [System.XML.XMLElement]$ExcludeAppElement = $ProductElement.ExcludeApp | Where { $_.ID -eq $ExcludeApp }
             if($ExcludeAppElement -eq $null){
                 [System.XML.XMLElement]$ExcludeAppElement=$ConfigFile.CreateElement("ExcludeApp")
                 $ProductElement.appendChild($ExcludeAppElement) | Out-Null
@@ -612,13 +614,15 @@ Here is what the portion of configuration file looks like when modified by this 
         $AddElement = $ConfigFile.Configuration.Add 
 
         #Set the desired values
-        [System.XML.XMLElement]$ProductElement = $ConfigFile.Configuration.Add.Product | ?  ID -eq $ProductId
+        [System.XML.XMLElement]$ProductElement = $ConfigFile.Configuration.Add.Product | Where { $_.ID -eq $ProductId }
         if($ProductElement -eq $null){
            throw "Cannot find Product with Id '$ProductId'"
         }
 
         if($PIDKEY -ne $null){
+          if($PIDKEY){
             $ProductElement.SetAttribute("PIDKEY", $PIDKEY) | Out-Null
+          }
         }
 
         if ($LanguageIds) {
@@ -629,7 +633,7 @@ Here is what the portion of configuration file looks like when modified by this 
                 }
 
                 foreach($LanguageId in $LanguageIds){
-                    [System.XML.XMLElement]$LanguageElement = $ProductElement.Language | ?  ID -eq $LanguageId
+                    [System.XML.XMLElement]$LanguageElement = $ProductElement.Language | Where { $_.ID -eq $LanguageId }
                     if($LanguageElement -eq $null){
                         [System.XML.XMLElement]$LanguageElement=$ConfigFile.CreateElement("Language")
                         $ProductElement.appendChild($LanguageElement) | Out-Null
@@ -648,7 +652,7 @@ Here is what the portion of configuration file looks like when modified by this 
             }
 
             foreach($ExcludeApp in $ExcludeApps){
-                [System.XML.XMLElement]$ExcludeAppElement = $ProductElement.ExcludeApp | ?  ID -eq $ExcludeApp
+                [System.XML.XMLElement]$ExcludeAppElement = $ProductElement.ExcludeApp | Where { $_.ID -eq $ExcludeApp }
                 if($ExcludeAppElement -eq $null){
                     [System.XML.XMLElement]$ExcludeAppElement=$ConfigFile.CreateElement("ExcludeApp")
                     $ProductElement.appendChild($ExcludeAppElement) | Out-Null
@@ -1781,7 +1785,7 @@ Here is what the portion of configuration file looks like when modified by this 
         }
 
         if($PackageGUID){
-            [System.XML.XMLElement]$PackageGUIDElement = $ConfigFile.Configuration.Property | ?  Name -eq "PACKAGEGUID"
+            [System.XML.XMLElement]$PackageGUIDElement = $ConfigFile.Configuration.Property | Where { $_.Name -eq "PACKAGEGUID" }
             if($PackageGUIDElement -eq $null){
                 [System.XML.XMLElement]$PackageGUIDElement=$ConfigFile.CreateElement("Property")
             }
